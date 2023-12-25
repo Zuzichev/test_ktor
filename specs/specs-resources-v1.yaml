@@ -1,0 +1,422 @@
+openapi: 3.0.3
+info:
+  title: Resources
+  description: Resources for Crowdproj
+  contact:
+    name: Nik Zyuzichev
+    email: zuzichev@mail.com
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080/api/v1
+tags:
+  - name: resource
+    description: Ресурс (время / товар и т.д.)
+paths:
+  /resource/create:
+    post:
+      tags:
+        - resource
+      summary: Create resource
+      operationId: resourceCreate
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceCreateRequest'
+        required: true
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceCreateResponse'
+  /resource/read:
+    post:
+      tags:
+        - resource
+      summary: Read resource
+      operationId: resourceRead
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceReadRequest'
+        required: true
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceReadResponse'
+  /resource/update:
+    post:
+      tags:
+        - resource
+      summary: Update resource
+      operationId: resourceUpdate
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceUpdateRequest'
+        required: true
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceUpdateResponse'
+  /resource/delete:
+    post:
+      tags:
+        - resource
+      summary: Delete resource
+      operationId: resourceDelete
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceDeleteRequest'
+        required: true
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceDeleteResponse'
+  /resource/search:
+    post:
+      tags:
+        - resource
+      summary: Search resource
+      parameters:
+        - $ref: '#/components/parameters/offsetParam'
+        - $ref: '#/components/parameters/limitParam'
+      operationId: resourceSearch
+      requestBody:
+        description: Request body
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ResourceSearchRequest'
+        required: true
+      responses:
+        200:
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResourceSearchResponse'
+
+components:
+  schemas:
+
+    IRequest: # Can be referenced as '#/components/schemas/IRequest'
+      type: object
+      description: An interface for all requests
+      properties:
+        requestType:
+          type: string
+          description: A discriminator to determinate the request type
+          example: create
+        requestId:
+          type: string
+          description: A request ID for debug
+      discriminator:
+        propertyName: requestType
+        mapping:
+          create: '#/components/schemas/ResourceCreateRequest'
+          read: '#/components/schemas/ResourceReadRequest'
+          update: '#/components/schemas/ResourceUpdateRequest'
+          delete: '#/components/schemas/ResourceDeleteRequest'
+          search: '#/components/schemas/ResourceSearchRequest'
+
+    Error:
+      $ref: './base.yaml#/components/schemas/Error'
+
+    ResponseResult: # Can be referenced as '#/components/schemas/ResponseResult'
+      $ref: './base.yaml#/components/schemas/ResponseResult'
+
+    IResponse: # Can be referenced as '#/components/schemas/IResponse'
+      type: object
+      description: An interface for all responses
+      properties:
+        responseType:
+          type: string
+          description: A discriminator to determinate the response type
+          example: create
+        requestId:
+          type: string
+          description: A response ID for debug
+        result:
+          $ref: '#/components/schemas/ResponseResult'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/Error'
+      discriminator:
+        propertyName: responseType
+        mapping:
+          create: '#/components/schemas/ResourceCreateResponse'
+          read: '#/components/schemas/ResourceReadResponse'
+          update: '#/components/schemas/ResourceUpdateResponse'
+          delete: '#/components/schemas/ResourceDeleteResponse'
+          search: '#/components/schemas/ResourceSearchResponse'
+          init: '#/components/schemas/ResourceInitResponse'
+
+    UserId:
+      $ref: './base.yaml#/components/schemas/UserId'
+
+    ResourceLock:
+      type: string
+      description: "An optimistic lock"
+
+    ResourceId:
+      type: string
+      description: Resource ID
+
+    OtherResourceId:
+      type: string
+      description: link to the Resource from other microservices
+
+    ScheduleId:
+      type: string
+      description: link to the Resource Schedule Template microservice
+
+    BaseResource:
+      type: object
+      description: "Object describes resources"
+      properties:
+        resourceId:
+          $ref: '#/components/schemas/OtherResourceId'
+        scheduleId:
+          $ref: '#/components/schemas/ScheduleId'
+        ownerId:
+          $ref: '#/components/schemas/UserId'
+
+    ResourceInitResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+
+    ResourceCreateObject:
+      allOf:
+        - type: object
+          properties:
+            resourceId:
+              $ref: '#/components/schemas/OtherResourceId'
+            scheduleId:
+              $ref: '#/components/schemas/ScheduleId'
+
+    ResourceCreateRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/ResourceRequestDebug'
+        - type: object
+          properties:
+            resource:
+              $ref: '#/components/schemas/ResourceCreateObject'
+
+    ResourceReadObject:
+      allOf:
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/ResourceId'
+
+    ResourceReadRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/ResourceRequestDebug'
+        - type: object
+          properties:
+            resource:
+              $ref: '#/components/schemas/ResourceReadObject'
+
+    ResourceUpdateObject:
+      allOf:
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/ResourceId'
+            resourceId:
+              $ref: '#/components/schemas/OtherResourceId'
+            scheduleId:
+              $ref: '#/components/schemas/ScheduleId'
+            lock:
+              $ref: '#/components/schemas/ResourceLock'
+
+    ResourceUpdateRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/ResourceRequestDebug'
+        - type: object
+          properties:
+            resource:
+              $ref: '#/components/schemas/ResourceUpdateObject'
+
+    ResourceDeleteObject:
+      allOf:
+        - type: object
+          properties:
+            id:
+              $ref: '#/components/schemas/ResourceId'
+            lock:
+              $ref: '#/components/schemas/ResourceLock'
+
+    ResourceDeleteRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/ResourceRequestDebug'
+        - type: object
+          properties:
+            resource:
+              $ref: '#/components/schemas/ResourceDeleteObject'
+
+    ResourceSearchFilter:
+      type: object
+      description: Набор фильтров для поиска
+      properties:
+        resourceId:
+          $ref: '#/components/schemas/OtherResourceId'
+        scheduleId:
+          $ref: '#/components/schemas/ScheduleId'
+
+    ResourceSearchRequest:
+      allOf:
+        - $ref: '#/components/schemas/IRequest'
+        - $ref: '#/components/schemas/ResourceRequestDebug'
+        - type: object
+          properties:
+            resourceFilter:
+              $ref: '#/components/schemas/ResourceSearchFilter'
+
+    ResourceResponseObject:
+      allOf:
+        - $ref: '#/components/schemas/BaseResource'
+        - type: object
+          description: Объект, который возвращается в ответе бэкенда
+          properties:
+            id:
+              $ref: '#/components/schemas/ResourceId'
+            lock:
+              $ref: '#/components/schemas/ResourceLock'
+            permissions:
+              type: array
+              uniqueItems: true
+              items:
+                $ref: '#/components/schemas/ResourcePermissions'
+
+    ResourcePermissions:
+      type: string
+      description: Доступы для клиента для операций над объявлением
+      enum:
+        - read
+        - update
+        - delete
+        - makeVisiblePublic
+        - makeVisibleOwn
+        - makeVisibleGroup
+
+    ResourceResponseSingle:
+      allOf:
+        - type: object
+          description: Ответ с одним объектом
+          properties:
+            resource:
+              $ref: '#/components/schemas/ResourceResponseObject'
+
+    ResourceResponseMulti:
+      allOf:
+        - type: object
+          description: Список найденных объектов
+          properties:
+            resources:
+              type: array
+              items:
+                $ref: '#/components/schemas/ResourceResponseObject'
+
+    ResourceCreateResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: '#/components/schemas/ResourceResponseSingle'
+
+    ResourceReadResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: '#/components/schemas/ResourceResponseSingle'
+
+    ResourceUpdateResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: '#/components/schemas/ResourceResponseSingle'
+
+    ResourceDeleteResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: '#/components/schemas/ResourceResponseSingle'
+
+    ResourceSearchResponse:
+      allOf:
+        - $ref: '#/components/schemas/IResponse'
+        - $ref: '#/components/schemas/ResourceResponseMulti'
+
+    #-------------------------------
+    # STUBS
+    #-------------------------------
+
+    ResourceRequestDebugMode:
+      $ref: './base.yaml#/components/schemas/CpRequestDebugMode'
+
+    ResourceRequestDebugStubs:
+      $ref: './base.yaml#/components/schemas/CpRequestDebugStubs'
+
+    ResourceDebug:
+      type: object
+      properties:
+        mode:
+          $ref: '#/components/schemas/ResourceRequestDebugMode'
+        stub:
+          $ref: '#/components/schemas/ResourceRequestDebugStubs'
+
+    ResourceRequestDebug:
+      type: object
+      properties:
+        debug:
+          $ref: '#/components/schemas/ResourceDebug'
+
+  #-------------------------------
+  # Reusable operation parameters
+  #-------------------------------
+  parameters:
+    offsetParam:
+      name: offset
+      in: query
+      description: Number of items to skip before returning the results.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 0
+        default: 0
+    limitParam: # Can be referenced as '#/components/parameters/limitParam'
+      name: limit
+      in: query
+      description: Maximum number of items to return.
+      required: false
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+        maximum: 100
+        default: 20

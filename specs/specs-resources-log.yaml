@@ -1,0 +1,104 @@
+openapi: 3.0.4
+info:
+  title: Resources log models
+  description: Log models for logging services of Resources
+  contact:
+    name: Nik Zyuzichev
+    email: zuzichev@mail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+paths: { }
+
+components:
+  schemas:
+    CommonLogModel:
+      title: Common log model
+      description: Common log model for all microservices
+      type: object
+      properties:
+        messageTime:
+          type: string
+        logId:
+          type: string
+        source:
+          type: string
+        resource:
+          $ref: '#/components/schemas/CwpLogModel'
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ErrorLogModel'
+
+    CwpLogModel:
+      title: log model for microservice Resources
+      type: object
+      properties:
+        requestId:
+          type: string
+        operation:
+          type: string
+          enum:
+            - create
+            - read
+            - update
+            - delete
+            - search
+        requestResource:
+          $ref: '#/components/schemas/ResourceLog'
+        requestFilter:
+          $ref: '#/components/schemas/ResourceFilterLog'
+        responseResource:
+          $ref: '#/components/schemas/ResourceLog'
+        responseResources:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResourceLog'
+
+    ErrorLogModel:
+      title: Модель лога для ошибки
+      type: object
+      properties:
+        code:
+          type: string
+          description: "Some specific code to identify an error for programming handling purposes"
+        group:
+          type: string
+          description: "An optional group id to segment different errors"
+        field:
+          type: string
+          description: "An optional field the error relates to"
+        title:
+          type: string
+          description: "A short explanation of the error to show as a tooltip or hint, for example"
+        description:
+          type: string
+          description: "A full description of the error with a complete information"
+
+    ResourceLog:
+      title: log model for resources
+      type: object
+      properties:
+        id:
+          type: string
+        resourceId:
+          type: string
+        scheduleId:
+          type: string
+        ownerId:
+          type: string
+        permissions:
+          type: array
+          uniqueItems: true
+          items:
+            type: string
+
+    ResourceFilterLog:
+      title: Model filter log
+      properties:
+        searchString:
+          type: string
+        ownerId:
+          type: string
+
